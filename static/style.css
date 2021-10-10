@@ -1,0 +1,24 @@
+html,body{
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 100%;
+    }
+
+
+input:focus{
+    outline: 0 0 0 0  !important;
+    box-shadow: 0 0 0 0 !important;
+    
+}
+
+.login_btn{
+    color: black;
+    background-color: #FFC312;
+    width: 100px;
+}
+    
+.login_btn:hover{
+    color: black;
+    background-color: white;
+}
+
