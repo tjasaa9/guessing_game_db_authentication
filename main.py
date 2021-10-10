@@ -1,8 +1,8 @@
 import random
 import hashlib
+import uuid
 from flask import Flask, render_template, request, make_response, redirect, url_for
 from models import User, db
-import uuid
 
 app = Flask(__name__)
 #create new tables in database
@@ -58,12 +58,25 @@ def login():
 
         return response
 
+@app.route("/profile", methods=["GET"])
+def profile():
+    session_token = request.cookies.get("session_token")
+
+    #get user from the database based on his/her email address
+    user = db.query(User).filter_by(session_token=session_token).first()
+
+    if user:
+        return render_template("profile.html", user=user)
+    else:
+        return redirect(url_for("index"))
+
 @app.route("/result", methods=["POST"])
 def result():
     guess = int(request.form.get("guess"))
 
     session_token = request.cookies.get("session_token")
 
+    # get user from the database based on her/his email address
     user = db.query(User).filter_by(session_token=session_token).first()
 
     
@@ -77,15 +90,58 @@ def result():
         user.secret_number = new_secret
         user.save()
 
-    
-
-
     elif guess > user.secret_number:
         message = "Your guess is incorrect, try something smaller."
     elif guess < user.secret_number:
         message = "Your guess is incorrect, try something bigger."
 
     return render_template("result.html", message=message)
+
+@app.route("/profile/edit", methods=["GET", "POST"])
+def profile_edit():
+    session_token = request.cookies.get("session_token")
+
+    #get user from the db based on their email
+    user = db.query(User).filter_by(session_token=session_token).first()
+
+    if request.method == "GET":
+        if user: #if user exists
+            return render_template("profile_edit.html", user=user)
+        else:
+            return redirect(url_for("index"))
+
+    #if the user changes their info  
+    elif request.method == "POST":
+        name = request.form.get("profile-name")
+        email = request.form.get("profile-email")
+
+        #update the user object
+        user.name = name
+        user.email = email
+
+        #store changes into the database
+        user.save()
+
+        return redirect(url_for("profile"))
+
+@app.route("/profile/delete", methods=["GET", "POST"])
+def profile_delete():
+    session_token = request.cookies.get("session_token")
+
+    #find user from the db by their email address
+    user = db.query(User).filter_by(session_token=session_token).first()
+
+    if request.method == "GET":
+        if user: #if user exists
+            return render_template("profile_delete.html", user=user)
+        else:
+            return redirect(url_for("index"))
+
+    elif request.method == "POST":
+    #delete the user in the database
+        user.delete()
+
+        return redirect(url_for("index"))
 
 if __name__ == "__main__":
     app.run(use_reloader=True)
