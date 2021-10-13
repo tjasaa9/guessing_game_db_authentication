@@ -1,4 +1,4 @@
-<>Centriraj vse skupaj na sredino strani
+<x>Centriraj vse skupaj na sredino strani
 <>Poglej, kaj je s "Success" naslovom
 <>Commitaj na Github
 <>Ostala pri "List of all users"

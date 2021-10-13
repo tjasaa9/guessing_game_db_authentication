@@ -114,6 +114,21 @@ def profile_edit():
     elif request.method == "POST":
         name = request.form.get("profile-name")
         email = request.form.get("profile-email")
+        old_password = request.form.get("old-password")
+        new_password = request.form.get("new-password")
+
+        if old_password and new_password:
+            hashed_old_password = hashlib.sha256(old_password.encode()).hexdigest()
+            hashed_new_password = hashlib.sha256(new_password.encode()).hexdigest()
+
+            #checks if the old password in equal to the hashed password in the ddb
+            if hashed_old_password == user.password:
+                #if it is equal, saves the new password in the db
+                user.password = hashed_new_password
+            else:
+                #if it's not equal, return an error
+                return "Wrong password! Try again." 
+
 
         #update the user object
         user.name = name
@@ -129,7 +144,7 @@ def profile_delete():
     session_token = request.cookies.get("session_token")
 
     #find user from the db by their email address
-    user = db.query(User).filter_by(session_token=session_token).first()
+    user = db.query(User).filter_by(session_token=session_token, deleted=False).first()
 
     if request.method == "GET":
         if user: #if user exists
@@ -138,10 +153,23 @@ def profile_delete():
             return redirect(url_for("index"))
 
     elif request.method == "POST":
-    #delete the user in the database
-        user.delete()
+    #this doesn't actually delete the user in the database. It "fake" deletes it's data.
+        user.deleted = True
+        user.save()
 
         return redirect(url_for("index"))
+
+@app.route("/users", methods=["GET"])
+def all_users():
+    users = db.query(User).all()
+
+    return render_template("users.html", users=users)
+
+@app.route("/user/<user_id>", methods=["GET"])
+def user_details(user_id):
+    user = db.query(User).get(int(user_id)) #.get() helps query by the ID
+
+    return render_template("user_details.html", user=user)
 
 if __name__ == "__main__":
     app.run(use_reloader=True)
