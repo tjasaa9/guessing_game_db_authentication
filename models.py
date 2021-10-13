@@ -12,3 +12,6 @@ class User(db.Model):
     secret_number = db.Column(db.Integer, unique=False)
     session_token = db.Column(db.String)
     deleted = db.Column(db.Boolean, default=False)
+
+    #create new tables in database
+db.create_all()

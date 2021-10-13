@@ -4,9 +4,7 @@ import uuid
 from flask import Flask, render_template, request, make_response, redirect, url_for
 from models import User, db
 
-app = Flask(__name__)
-#create new tables in database
-db.create_all() 
+app = Flask(__name__) 
 
 @app.route("/", methods=["GET"])
 def index():
