@@ -2,6 +2,7 @@ import random
 import hashlib
 import uuid
 from flask import Flask, render_template, request, make_response, redirect, url_for
+from werkzeug.wrappers import response
 from models import User, db
 
 app = Flask(__name__) 
@@ -168,6 +169,16 @@ def user_details(user_id):
     user = db.query(User).get(int(user_id)) #.get() helps query by the ID
 
     return render_template("user_details.html", user=user)
+
+
+#Logout - session-token expires
+@app.route("/index", methods=["GET"])
+def clear():
+    resp = make_response(render_template("index.html"))
+    resp.set_cookie("session_token", expires=0)
+
+
+    return resp
 
 if __name__ == "__main__":
     app.run(use_reloader=True)
